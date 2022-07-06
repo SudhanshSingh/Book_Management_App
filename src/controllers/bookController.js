@@ -16,7 +16,7 @@ const createBook = async function (req, res) {
         if (!Object.keys(data).length) {
             return res.status(400).send({ status: false, message: "You must enter data" })
         }
-        let {title,excerpt,userId,ISBN,category,subcategory,reviews,} = data
+        let {title,excerpt,userId,ISBN,category,subcategory} = data
         if (!title) return res.status(400).send({ status: false, message: "You must enter title" })
 
         if (!isValid(title)) {
