@@ -9,11 +9,12 @@ const authenticate = function (req, res, next) {
         if (!token) token = req.headers["x-Api-key"];
         if (!token) { return res.status(400).send({ status: false, message: "token must be present" }) };
 
-        if (token.length != 215) { return res.status(400).send({ status: false, message: "token must be valid" }) };
+        // if (token.length != 215) { return res.status(400).send({ status: false, message: "token must be valid" }) };
         let decodedToken = jwt.verify(token, "Functionup-Radon");
         if (decodedToken.length == 0) {
             return res.status(404).send({ status: false, message: "token is not valid" })
         };
+        req.body.tokenId=decodedToken.userId
         next();
     } catch (err) {
         return res.status(500).send({ message: "Error", error: err.message });

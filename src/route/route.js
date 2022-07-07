@@ -10,16 +10,18 @@ router.post("/register",userController.createUser)
 
 router.post("/login",userController.loginUser)
 
-router.post("/books", middleWare.authenticate, middleWare.authorize, bookController.createBook)
+
+
+
+router.post("/books", middleWare.authenticate, bookController.createBook)
 
 router.get("/books", middleWare.authenticate, bookController.getBooks)
 
+router.get("/books/:bookId",middleWare.authenticate,bookController.getById)
 
-router.get("/books",bookController.deleteBookById)
+router.put("/books/:bookId",middleWare.authenticate,middleWare.authorize,bookController.updateById)
 
-router.get("/books",bookController.getDetails)
-
-router.put("/books/:bookId",bookController.updateBook)
+router.delete("/books/:bookId",middleWare.authenticate,middleWare.authorize,bookController.deleteBookById)
 
 
 
