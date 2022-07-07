@@ -16,7 +16,7 @@ const createBook = async function (req, res) {
         if (!Object.keys(data).length) {
             return res.status(400).send({ status: false, message: "You must enter data" })
         }
-        let { title, excerpt, userId, ISBN, category, subcategory, reviews, } = data
+        let { title, excerpt, userId, ISBN, category, subcategory} = data
         if (!title) return res.status(400).send({ status: false, message: "You must enter title" })
 
         if (!isValid(title)) {
@@ -32,13 +32,13 @@ const createBook = async function (req, res) {
             return res.status(400).send({ status: false, msg: "excerpt should not be empty " })
         }
 
-        if (!userId) return res.status(400).send({ status: false, message: "You must enter excerpt" })
+        if (!userId) return res.status(400).send({ status: false, message: "You must enter userId" })
 
 
-        if (mongoose.isValidObjectId(userId)) return res.status(400).send({ status: false, msg: "userId  is not valid " })
+        if (!mongoose.isValidObjectId(userId)) return res.status(400).send({ status: false, msg: "userId  is not valid " })
 
         let checkUserId = await userModel.findOne({ userId })
-        if (!checkUserId) { return res.status(400).send({ status: false, message: " Not valid user , please register" }) }
+        if (!checkUserId) { return res.status(400).send({ status: false, message: " Not valid user, please register" }) }
 
         if (!category) return res.status(400).send({ status: false, message: "category is required" })
 
@@ -79,4 +79,4 @@ const getBooks = async function (req, res) {
 
 }
 
-module.exports = (createBook,getBooks)
+module.exports = {createBook,getBooks}
