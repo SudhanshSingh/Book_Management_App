@@ -18,20 +18,20 @@ const createBook = async function (req, res) {
         }
         let { title, excerpt, userId, ISBN, category, subcategory, releasedAt } = data
 
+
         if (!title) return res.status(400).send({ status: false, message: "You must enter title" })
         if (!isValid(title)) return res.status(400).send({ status: false, msg: "title should not be empty" })
         let checkTitle = await bookModel.findOne({ title })
         if (checkTitle) { return res.status(400).send({ status: false, message: "This title is already present" }) }
 
-
         if (!excerpt) return res.status(400).send({ status: false, message: "You must enter excerpt" })
         if (!isValid(excerpt)) return res.status(400).send({ status: false, msg: "excerpt should not be empty " })
     
-
         if (!userId) return res.status(400).send({ status: false, message: "You must enter excerpt" })
         if (!mongoose.isValidObjectId(userId)) return res.status(400).send({ status: false, msg: "userId  is not valid " })
+
         let checkUserId = await userModel.findOne({ userId })
-        if (!checkUserId) { return res.status(400).send({ status: false, message: " Not valid user , please register" }) }
+        if (!checkUserId) { return res.status(400).send({ status: false, message: " please register not a valid user " }) }
 
         if (!ISBN) return res.status(400).send({ status: false, message: "You must enter ISBN" })
         if (!isValid(ISBN)) return res.status(400).send({ status: false, msg: "ISBN should not be empty" })
@@ -51,8 +51,6 @@ const createBook = async function (req, res) {
 
         let created = await bookModel.create(data)
         res.status(201).send({ status: true, message: 'Success', data: created })
-
-
     }
     catch (err) {
         return res.status(500).send({ status: false, mag: err.message })
@@ -88,6 +86,65 @@ const getBooks = async function (req, res) {
         res.status(500).send({ status: false, msg: error.message })
     }
 }
+/////////////////////////////////// GET /books/:bookId   ////////////////////////
+const getDetails = async function (req, res) {
+    try {
+     
+      let  bookId  = req.params.bookId;
+  
+      if (!bookId) {
+        return res
+          .status(400)
+          .send({ status: false, message: "Enter BookId in the params" });
+      }
+  
+      // validating the BookId
+      if (!mongoose.isValidObjectId(bookId)) return res.status(400)
+      .send({ status: false, message: "BookId  is not valid " })
+
+
+     let findBook = await bookModel.findOne({
+         _id :bookId ,
+      isDeleted: false,
+     });
+     
+
+     
+    
+
+     //console.log(findBook)
+
+     if (!findBook)
+     return res.status(404).send({ status: false, message: "Book is not found" });
+         
+         
+
+
+     return res.status(200) .send({ status: true, message: "successful",data :findBook });
+     
+
+//      let getReviews = await reviewModel
+//       .find({  _id :bookId, isDeleted: false })
+      
+
+//      if (!getReviews.length)
+//        return res.status(404).send({
+//          status: false,
+//          message: `No Review present for ${title} Book`,
+//        });
+
+//    // let result = await bookModel
+//       //.findOne({ title: bookTitle, isDeleted: false })
+     
+
+//      //result._doc["reviews"] = get;
+   
+//     return res.status(200).send({ status: true, data: result[0] });
+   } catch (err) {
+    return res.status(500).send({ status: false, message: err.message });
+  }
+ };
+
 
 const updateBook = async function(req,res){
     try{
@@ -140,4 +197,7 @@ const updateBook = async function(req,res){
         res.status(500).send({ status: false, msg: error.message })
     }
 }
-module.exports = {createBook,getBooks,updateBook}
+
+
+module.exports = {createBook,getBooks,getDetails,updateBook}
+

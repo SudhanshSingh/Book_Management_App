@@ -52,6 +52,7 @@ const createUser = async function (req, res) {
         if ((userData.password).includes(" ")) { { return res.status(400).send({ status: false, message: "Please remove any empty spaces in password" }); } }
         if (!((userData.password.length >= 8) && (userData.password.length < 15))) { return res.status(400).send({ status: false, message: "Password should be in 8-15 character" }) }
 
+
         if (Object.keys(userData.address).length == 0) { return res.status(400).send({ status: false, message: "Address can't be empty" }); }
         if (!isValid(userData.address.street)) { return res.status(400).send({ status: false, message: "Street address is not valid address" }); }
         //if ((userData.address.street).includes(" ")) { { return res.status(400).send({ status: false, message: "Please remove any empty spaces from Street address" }); } }
@@ -76,10 +77,9 @@ const createUser = async function (req, res) {
 const loginUser = async function(req, res) {
     try {
         const data = req.body;
-        if (!Object.keys(data).length) {
-            return res.status(400).send({ status: false, msg: "Invalid request parameters. Please provide login details" });
-        }
 
+        if (!Object.keys(data).length) return res.status(400).send({ status: false, msg: "Invalid request parameters. Please provide login details" });
+        
         // Extract parameter 
         let { email, password } = data
 
@@ -115,3 +115,4 @@ const loginUser = async function(req, res) {
 
 }
 module.exports = { createUser, loginUser }
+
