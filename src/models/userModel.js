@@ -1,15 +1,21 @@
 const mongoose = require('mongoose')
 const userSchema = new mongoose.Schema({
     
-    Name: {
-        type: String,
-        required: true,
-        trim: true
-    },
     title: {
         type: String,
         required: true,
         enum: ['Mr', 'Mrs', 'Miss'],
+        trim: true
+    },
+    name: {
+        type: String,
+        required: true,
+        trim: true
+    },
+    phone : {
+        type: String,
+        required: true,
+        unique: true,
         trim: true
     },
     email: {
@@ -23,16 +29,10 @@ const userSchema = new mongoose.Schema({
         required: true,
         trim: true
     }, 
-    Phone : {
-        type: String,
-        required: true,
-        unique: true,
-        trim: true
-    },
     address: {
-        street: {string},
-        city: {string},
-        pincode: {string}
+        street: {type:String},
+        city: {type:String},
+        pincode: {type:String}
       },
         
  },{ timestamps: true })
