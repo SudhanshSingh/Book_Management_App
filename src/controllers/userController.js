@@ -1,3 +1,4 @@
+
 const jwt = require("jsonwebtoken");
 const secretKey = "Functionup-Radon";
 const userModel = require("../models/userModel");
@@ -50,9 +51,7 @@ const createUser = async function (req, res) {
         if (!userData.password) { return res.status(400).send({ status: false, message: "Please include a password" }) };
         if (!isValid(userData.password)) { return res.status(400).send({ status: false, message: "password is required." }); }
         if ((userData.password).includes(" ")) { { return res.status(400).send({ status: false, message: "Please remove any empty spaces in password" }); } }
-        if (((userData.password).length) < 8 && (userData.password).length >= 15) { return res.status(400).send({ status: false, message: "Password should be in 8-15 character" }) }
-        
-
+        if ((userData.password.length < 8) && (userData.password.length > 15)) { return res.status(400).send({ status: false, message: "Password should be in 8-15 character" }) }
 
         if (Object.keys(userData.address).length == 0) { return res.status(400).send({ status: false, message: "Address can't be empty" }); }
         if (!isValid(userData.address.street)) { return res.status(400).send({ status: false, message: "Street address is not valid address" }); }
@@ -78,7 +77,11 @@ const createUser = async function (req, res) {
 const loginUser = async function(req, res) {
     try {
         const data = req.body;
-        if (Object.keys(data).length==0){
+
+       
+        if  (Object.keys(data).length==0)
+        {
+
             return res.status(400).send({ status: false, msg: "Invalid request parameters. Please provide login details" });
         }
 
@@ -117,3 +120,4 @@ const loginUser = async function(req, res) {
 
 }
 module.exports = { createUser, loginUser }
+
