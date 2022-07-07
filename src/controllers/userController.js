@@ -1,4 +1,3 @@
-
 const jwt = require("jsonwebtoken");
 const secretKey = "Functionup-Radon";
 const userModel = require("../models/userModel");
@@ -22,7 +21,7 @@ const createUser = async function (req, res) {
         if (!userData.title) { return res.status(400).send({ status: false, message: "Please include a title" }) };
         if (!isValid(userData.title)) { return res.status(400).send({ status: false, message: "Title is required." }); }
         let arr = ["Mr","Mrs","Miss"]
-        let titleCheck=arr.includes(userData.title)
+        let titleCheck= arr.includes(userData.title)
         if(!titleCheck)return res.status(400).send({ status: false, message: "Enter a valid title-Mr,Mrs,Miss" })
 
 
@@ -32,7 +31,7 @@ const createUser = async function (req, res) {
         
         if (!userData.phone) return res.status(400).send({ status: false, message: "phone must be present" })
         if (!(/^[6-9]{1}[0-9]{9}$/im.test(userData.phone))) return res.status(400).send({ status: false, message: "Phone number is invalid." })
-        if (!isValid(userData.phone)) { return res.status(400).send({ status: false, message: "Phone number is required." }); }
+        //if (!isValid(userData.phone)) { return res.status(400).send({ status: false, message: "Phone number is required." }); }
         if ((userData.phone).includes(" ")) { { return res.status(400).send({ status: false, message: "Please remove any empty spaces from phone number" }); } }
         const uniqueMobile = await userModel.findOne({ phone: userData.phone })
         if (uniqueMobile) return res.status(400).send({ status: false, message: "Phone number already exists." })
@@ -51,11 +50,12 @@ const createUser = async function (req, res) {
         if (!userData.password) { return res.status(400).send({ status: false, message: "Please include a password" }) };
         if (!isValid(userData.password)) { return res.status(400).send({ status: false, message: "password is required." }); }
         if ((userData.password).includes(" ")) { { return res.status(400).send({ status: false, message: "Please remove any empty spaces in password" }); } }
-        if ((userData.password.length < 8) && (userData.password.length > 15)) { return res.status(400).send({ status: false, message: "Password should be in 8-15 character" }) }
+        if (!((userData.password.length >= 8) && (userData.password.length < 15))) { return res.status(400).send({ status: false, message: "Password should be in 8-15 character" }) }
+
 
         if (Object.keys(userData.address).length == 0) { return res.status(400).send({ status: false, message: "Address can't be empty" }); }
         if (!isValid(userData.address.street)) { return res.status(400).send({ status: false, message: "Street address is not valid address" }); }
-        if ((userData.address.street).includes(" ")) { { return res.status(400).send({ status: false, message: "Please remove any empty spaces from Street address" }); } }
+        //if ((userData.address.street).includes(" ")) { { return res.status(400).send({ status: false, message: "Please remove any empty spaces from Street address" }); } }
 
         if (!isValid(userData.address.city)) { return res.status(400).send({ status: false, message: "City address is not valid address" }); }
         if ((userData.address.city).includes(" ")) { { return res.status(400).send({ status: false, message: "Please remove any empty spaces from City address" }); } }
@@ -78,13 +78,9 @@ const loginUser = async function(req, res) {
     try {
         const data = req.body;
 
-       
-        if  (Object.keys(data).length==0)
-        {
 
-            return res.status(400).send({ status: false, msg: "Invalid request parameters. Please provide login details" });
-        }
-
+        if (!Object.keys(data).length) return res.status(400).send({ status: false, msg: "Invalid request parameters. Please provide login details" });
+        
         // Extract parameter 
         let { email, password } = data
 

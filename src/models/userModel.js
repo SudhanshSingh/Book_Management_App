@@ -33,6 +33,7 @@ const userSchema = new mongoose.Schema({
     address: {
         street: {type:String},
         city: {type:String},
+
         pincode: {type:String}
       },
         

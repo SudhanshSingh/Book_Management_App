@@ -14,7 +14,14 @@ router.post("/books",bookController.createBook)
 
 router.get("/books",bookController.getBooks)
 
+
 router.get("/books",bookController.deleteBookById)
+
+router.get("/books",bookController.getDetails)
+
+router.put("/books/:bookId",bookController.updateBook)
+
+
 
 
 module.exports = router
