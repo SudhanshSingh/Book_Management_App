@@ -5,7 +5,7 @@ const ObjectId = mongoose.Schema.Types.ObjectId
 const bookSchema = new mongoose.Schema({
     title: {type :String, required : "Title is required", unique:true , trim :true},
     excerpt: {type :String, required : "excerpt is required" }, 
-    userId: {type : ObjectId, required :"UserId is required" , refs : "User"},
+    userId: {type : ObjectId, required :"UserId is required" , ref : "User"},
     ISBN: {type:String, required: "ISBN is required", unique : true},
     category: {type :String, required : "Category is required" },
     subcategory: {type :[String], required: "Subcategory is required"},
