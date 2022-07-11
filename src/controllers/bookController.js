@@ -64,7 +64,7 @@ const createBook = async function (req, res) {
             releasedAt:releasedAt
         }
         let created = await bookModel.create(reqData)
-        res.status(201).send({ status: true, message: 'Success', data: created })
+        res.status(201).send({ status: true, message: 'Successfully Book Data is Created', data: created })
     }
     catch (err) {
         return res.status(500).send({ status: false, mag: err.message })
@@ -94,10 +94,9 @@ const getBooks = async function (req, res) {
         let allBooks = await bookModel.find({ $and: [query, { isDeleted: false }] }).collation({ locale: "en" }).sort({ "title": 1 }).select({ title: 1, excerpt: 1, userId: 1, category: 1, reviews: 1, releasedAt: 1 })
         if (allBooks.length == 0) return res.status(404).send({ status: false, message: "no such book" })
 
-        res.status(200).send({ status: true, message: "success", data: allBooks })
+        res.status(200).send({ status: true, message: "successfully Show the all books", data: allBooks })
     }
     catch (error) {
-        console.log(error)
         res.status(500).send({ status: false, msg: error.message })
     }
 }
