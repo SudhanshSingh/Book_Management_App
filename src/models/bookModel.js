@@ -1,8 +1,8 @@
-//const moment = require("moment")
 const mongoose = require("mongoose")
 const ObjectId = mongoose.Schema.Types.ObjectId
 
 const bookSchema = new mongoose.Schema({
+
     title: {type :String, required : "Title is required", unique:true , trim :true},
     excerpt: {type :String, required : "excerpt is required" }, 
     userId: {type : ObjectId, required :"UserId is required" , ref : "User"},
@@ -13,6 +13,7 @@ const bookSchema = new mongoose.Schema({
     deletedAt: {type :Date }, 
     isDeleted: {type :Boolean, default: false},
     releasedAt:{ type :String , required : true },
+
 },{ timeStamps :true})
 
 module.exports = mongoose.model("Book",bookSchema)
