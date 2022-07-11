@@ -17,35 +17,37 @@ const createUser = async function (req, res) {
         let userData = req.body;
         if (Object.keys(userData).length == 0) { return res.status(400).send({ status: false, message: "UserData can't be empty" }); }
 
-        if (!userData.title) return res.status(400).send({ status: false, message: "Please include a title" });
+        let {title, name, phone,email,password} = userData
+
+        if (!title) return res.status(400).send({ status: false, message: "Please include a title" });
         //if(!isValid(userData.title)) return res.status(400).send({ status: false, message: "title is invalid" })
         let arr = ["Mr", "Mrs", "Miss"]
-        let titleCheck = arr.includes(userData.title)
+        let titleCheck = arr.includes(title)
         if (!titleCheck) return res.status(400).send({ status: false, message: "Enter a valid title-Mr,Mrs,Miss" })
 
-        if (!userData.name) return res.status(400).send({ status: false, message: "Please include the name" });
-        if(!(/^[a-zA-Z,\-.\s]*$/.test(userData.name))) return res.status(400).send({ status: false, message: "provide a valid name" });
-        if (!isValid(userData.name)) return res.status(400).send({ status: false, message: "Name is invalid" });
+        if (!name) return res.status(400).send({ status: false, message: "Please include the name" });
+        if(!(/^[a-zA-Z,\-.\s]*$/.test(name))) return res.status(400).send({ status: false, message: "provide a valid name" });
+        if (!isValid(name)) return res.status(400).send({ status: false, message: "Name is invalid" });
 
-        if (!userData.phone) return res.status(400).send({ status: false, message: "phone number must be present" })
-        if (!(/^[6-9]{1}[0-9]{9}$/im.test(userData.phone))) return res.status(400).send({ status: false, message: "Phone number is invalid." })
-        if (!isValid(userData.phone)) { return res.status(400).send({ status: false, message: "Phone number is required." }); }
-        if ((userData.phone).includes(" ")) { { return res.status(400).send({ status: false, message: "Please remove any empty spaces from phone number" }); } }
-        const uniqueMobile = await userModel.findOne({ phone: userData.phone })
+        if (!phone) return res.status(400).send({ status: false, message: "phone number must be present" })
+        if (!(/^[6-9]{1}[0-9]{9}$/im.test(phone))) return res.status(400).send({ status: false, message: "Phone number is invalid." })
+        if (!isValid(phone)) { return res.status(400).send({ status: false, message: "provide phone no. in string." }); }
+        if ((phone).includes(" ")) { { return res.status(400).send({ status: false, message: "Please remove any empty spaces from phone number" }); } }
+        const uniqueMobile = await userModel.findOne({ phone })
         if (uniqueMobile) return res.status(400).send({ status: false, message: "Phone number already exists." })
 
-        if (!userData.email) { return res.status(400).send({ status: false, message: "Please include an email" }) };
-        if (!isValid(userData.email)) { return res.status(400).send({ status: false, message: "Email is required" }); }
-        const vaildEmail = /^\w+([\.-]?\w+)@\w+([\.-]?\w+)(\.\w{2,3})+$/.test(userData.email)
+        if (!email) { return res.status(400).send({ status: false, message: "Please include an email" }) };
+        const vaildEmail = /^\w+([\.-]?\w+)@\w+([\.-]?\w+)(\.\w{2,3})+$/.test(email)
         if (!vaildEmail) return res.status(400).send({ status: false, message: "Email is invalid.Please use correct EmailId" })
-        if ((userData.email).includes(" ")) { { return res.status(400).send({ status: false, message: "Please remove any empty spaces in email" }); } }
-        let emailOld = await userModel.findOne({ email: userData.email })
+        //if (!isValid(email)) { return res.status(400).send({ status: false, message: "provide Email in string" }); }
+        if ((email).includes(" ")) { { return res.status(400).send({ status: false, message: "Please remove any empty spaces in email" }); } }
+        let emailOld = await userModel.findOne({ email})
         if (emailOld) { { return res.status(400).send({ status: false, message: "email already exists" }) } }
 
-        if (!userData.password) { return res.status(400).send({ status: false, message: "Please include a password" }) };
-        if (!isValid(userData.password)) { return res.status(400).send({ status: false, message: "password is invalid" }); }
-        if ((userData.password).includes(" ")) { { return res.status(400).send({ status: false, message: "Please remove any empty spaces in password" }); } }
-        if (!((userData.password.length >= 8) && (userData.password.length < 15))) { return res.status(400).send({ status: false, message: "Password should be in 8-15 character" }) }
+        if (!password) { return res.status(400).send({ status: false, message: "Please include a password" }) };
+        if (!isValid(password)) { return res.status(400).send({ status: false, message: "password is invalid" }); }
+        if ((password).includes(" ")) { { return res.status(400).send({ status: false, message: "Please remove any empty spaces in password" }); } }
+        if (!((password.length >= 8) && (password.length < 15))) { return res.status(400).send({ status: false, message: "Password should be in 8-15 character" }) }
 
         if (userData.address) {
             if (Object.keys(userData.address).length == 0) { return res.status(400).send({ status: false, message: "Address can't be empty" }); }
@@ -68,6 +70,7 @@ const createUser = async function (req, res) {
         let savedData = await userModel.create(userData);
         return res.status(201).send({ status: true, message: "UserData is successfully created", data: savedData, });
     } catch (err) {
+        console.log(err)
         return res.status(500).send({ status: false, message: "Error", error: err.message });
     }
 };
@@ -84,13 +87,12 @@ const loginUser = async function (req, res) {
         let { email, password } = data
 
         // valitaion start to here 
-        if (!isValid(email)) return res.status(400).send({ status: false, msg: "Email is required for login" });
         if (!email) return res.status(400).send({ status: false, msg: "Please include a email" });
+        if (!/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email)) return res.status(400).send({ status: false, msg: "Enter valid email address." })
+        if (!isValid(email)) return res.status(400).send({ status: false, msg: "Email is required for login" });
         // Email validation whether it is entered perfect or not.
-        email = email.trim();
-        if (!/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email)) {
-            return res.status(400).send({ status: false, msg: "Enter valid email address." })
-        }
+        //email = email.trim();
+        
 
         if (!isValid(password)) return res.status(400).send({ status: false, msg: "Password is mandatory for login" });
         if (!password) { return res.status(400).send({ status: false, msg: "Please include a password." }); }

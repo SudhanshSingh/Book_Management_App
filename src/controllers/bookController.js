@@ -1,13 +1,14 @@
 const mongoose = require("mongoose");
 const bookModel = require("../models/bookModel");
+const reviewModel = require("../models/reviewModel");
 const userModel = require("../models/userModel");
 
 const isValid = function (value) {
     if (typeof value === "undefined" || value === null) return false
     if (typeof value === "string" && value.trim().length === 0) return false
     if (typeof value === "string") return true
-
 }
+
 ////////////////////////////////////////////////////-----CREATE BOOK-------//////////////////////////////////////////////////////////////////
 const createBook = async function (req, res) {
     try {
@@ -113,27 +114,17 @@ const getById = async function (req, res) {
         // validating the BookId
         if (!mongoose.isValidObjectId(bookId)) return res.status(400).send({ status: false, message: "BookId  is not valid " })
         let findBook = await bookModel.findOne({ _id: bookId, isDeleted: false, });
-        //console.log(findBook)
+        console.log({...findBook})
         if (!findBook) return res.status(404).send({ status: false, message: "Book is not found" });
-        return res.status(200).send({ status: true, message: "successful", data: findBook });
-        //      let getReviews = await reviewModel
-        //       .find({  _id :bookId, isDeleted: false })
 
+        let reviews= await reviewModel.find({bookId:bookId,isDeleted:false})
+        // console.log(reviews)
 
-        //      if (!getReviews.length)
-        //        return res.status(404).send({
-        //          status: false,
-        //          message: `No Review present for ${title} Book`,
-        //        });
-
-        //    // let result = await bookModel
-        //       //.findOne({ title: bookTitle, isDeleted: false })
-
-
-        //      //result._doc["reviews"] = get;
-
-        //     return res.status(200).send({ status: true, data: result[0] });
+        let bookData = {...findBook._doc,reviewsData:reviews}
+        return res.status(200).send({ status: true, message: "booklist", data: bookData  });
+        
     } catch (err) {
+        console.log(err)
         return res.status(500).send({ status: false, message: err.message });
     }
 };
