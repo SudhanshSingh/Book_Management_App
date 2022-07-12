@@ -1,6 +1,5 @@
 const mongoose = require("mongoose");
 const bookModel = require("../models/bookModel");
-const userModel = require("../models/userModel");
 const reviewModel = require("../models/reviewModel");
 
 
@@ -15,8 +14,9 @@ const createReview = async function (req, res) {
         let data = req.body;
         let bookId = req.params.bookId
 
-        if (!bookId) return res.status({ status: false, message: "please enter bookId" })
-        if (!mongoose.isValidObjectId(bookId)) return res.status(400).send({ ststua: false, message: "provide valid bookId" })
+
+        if (!bookId) return res.status(400).send({ status: false, message: "please enter bookId" })
+        if(!mongoose.isValidObjectId(bookId)) return res.status(400).send({status:false,message:"provide valid bookId"})
         let checkId = await bookModel.findById({ _id: bookId })
         if (!checkId) return res.status(404).send({ status: false, message: "no such book" })
         if (checkId.isDeleted == true) return res.status(404).send({ status: false, message: "this book is deleted" })
@@ -51,8 +51,9 @@ const createReview = async function (req, res) {
         let newReview = await reviewModel.create(reviewData)
 
         let bookUpdate = await bookModel.findByIdAndUpdate({ _id: bookId }, { reviews: checkId.reviews + 1 }, { new: true })
-        let showData = { ...bookUpdate._doc, reviewData: [newReview] }
-        res.status(200).send({ status: true, message: "review created", data: showData })
+
+        let showData = {...bookUpdate._doc,reviewData:[newReview]}
+        res.status(200).send({ status: true, message: "review created", data: showData})
 
     } catch (err) {
         console.log(err)
@@ -67,15 +68,17 @@ const updateReview = async function (req, res) {
         let bookId = req.params.bookId
         let reviewId = req.params.reviewId
 
-        if (!bookId) return res.status({ status: false, message: "please enter bookId" })
-        if (!mongoose.isValidObjectId(bookId)) return res.status(400).send({ ststua: false, message: "provide valid bookId" })
+
+        if (!bookId) return res.status(400).send({ status: false, message: "please enter bookId" })
+        if(!mongoose.isValidObjectId(bookId)) return res.status(400).send({status:false,message:"provide valid bookId"})
         let checkId = await bookModel.findById({ _id: bookId })
         if (!checkId) return res.status(404).send({ status: false, message: "no such book" })
         if (checkId.isDeleted == true) return res.status(404).send({ status: false, message: "this book is deleted" })
 
-        if (!reviewId) return res.status({ status: false, message: "please enter reviewId" })
-        if (!mongoose.isValidObjectId(reviewId)) return res.status(400).send({ ststua: false, message: "provide valid reviewId" })
-        let checkreview = await reviewModel.findOne({ _id: reviewId, bookId: bookId })
+
+        if (!reviewId) return res.status(400).send({ status: false, message: "please enter reviewId" })
+        if(!mongoose.isValidObjectId(reviewId)) return res.status(400).send({status:false,message:"provide valid reviewId"})
+        let checkreview = await reviewModel.findById({ _id: reviewId })
         if (!checkreview) return res.status(404).send({ status: false, message: "no such review" })
         if (checkreview.isDeleted == true) return res.status(404).send({ status: false, message: "this review is deleted" })
 
@@ -113,9 +116,8 @@ const updateReview = async function (req, res) {
             }
         }, { new: true })
 
-        res.status(200).send({ status: true, message: "review created", data: { ...checkId._doc, reviewData: [updateDoc] } })
+        res.status(200).send({ status: true, message: "review created", data: {...checkId._doc,reviewData:[updateDoc]}})
     } catch (err) {
-        console.log(err)
         return res.status(500).send({ status: false, mag: err.message })
 
     }
@@ -128,22 +130,25 @@ const deleteReview = async function (req, res) {
         let reviewId = req.params.reviewId
         // console.log(bookId,reviewId)
 
-        if (!bookId) return res.status({ status: false, message: "please enter bookId" })
-        if (!mongoose.isValidObjectId(bookId)) return res.status(400).send({ ststua: false, message: "provide valid bookId" })
+
+        if (!bookId) return res.status(400).send({ status: false, message: "please enter bookId" })
+        if(!mongoose.isValidObjectId(bookId)) return res.status(400).send({status:false,message:"provide valid bookId"})
         let checkId = await bookModel.findById({ _id: bookId })
         if (!checkId) return res.status(404).send({ status: false, message: "no such book" })
         if (checkId.isDeleted == true) return res.status(404).send({ status: false, message: "this book is deleted" })
 
-        if (!reviewId) return res.status({ status: false, message: "please enter reviewId" })
-        if (!mongoose.isValidObjectId(reviewId)) return res.status(400).send({ ststua: false, message: "provide valid reviewId" })
-        let checkreview = await reviewModel.findOne({ _id: reviewId, bookId: bookId })
+
+        if (!reviewId) return res.status(400).send({ status: false, message: "please enter reviewId" })
+        if(!mongoose.isValidObjectId(reviewId)) return res.status(400).send({status:false,message:"provide valid reviewId"})
+        let checkreview = await reviewModel.findById({ _id: reviewId })
         if (!checkreview) return res.status(404).send({ status: false, message: "no such review" })
         if (checkreview.isDeleted == true) return res.status(404).send({ status: false, message: "this review is deleted" })
 
         let Update = await reviewModel.findOneAndUpdate({ _id: reviewId }, { isDeleted: true, deletedAt: Date.now() }, { new: true });
 
         let bookUpdate = await bookModel.findByIdAndUpdate({ _id: bookId }, { reviews: checkId.reviews - 1 }, { new: true })
-        console.log({ ...bookUpdate._doc, reviewData: [Update] })
+
+        console.log({...bookUpdate._doc,reviewData:[Update]})
 
         return res.status(200).send({ status: true, message: "successfully deleted review", });
 
