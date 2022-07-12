@@ -7,7 +7,7 @@ const authenticate = function (req, res, next) {
    try {
         let token = req.headers["x-api-key"];
         if (!token) token = req.headers["x-Api-key"];
-        if (!token) { return res.status(400).send({ status: false, message: "token must be present" }) };
+        if (!token) { return res.status(400).send({ status: false, message: "token must be present" }) }
 
         //if (token.length != 153) { return res.status(400).send({ status: false, message: "token must be valid" }) };
         let decodedToken = jwt.verify(token, "Functionup-Radon");
@@ -20,6 +20,7 @@ const authenticate = function (req, res, next) {
         next();
 
     } catch (err) {
+        console.log(err)
        return res.status(500).send({ message: "Error", error: err.message });
     }
 };

@@ -25,11 +25,13 @@ const createBook = async function (req, res) {
         if (checkTitle) { return res.status(400).send({ status: false, message: "This title is already present" }) }
 
         if (!excerpt) return res.status(400).send({ status: false, message: "You must enter excerpt" })
-        if (!isValid(excerpt)) return res.status(400).send({ status: false, msg: "excerpt should not be empty " })
+        if (!isValid(excerpt)) return res.status(400).send({ status: false, msg: "Provide a Valid Excerpt" })
+
 
         if (!userId) return res.status(400).send({ status: false, message: "You must enter userId" })
+        if (!isValid(userId)) return res.status(400).send({ status: false, msg: "userId should not be empty & put it in  a string" })
         if (!mongoose.isValidObjectId(userId)) return res.status(400).send({ status: false, msg: "userId  is not valid " })
-        let checkUserId = await userModel.findOne({ userId })
+        let checkUserId = await userModel.findOne({ _id:userId })
         if (!checkUserId) { return res.status(400).send({ status: false, message: " please register. not a valid user. " }) }
 
         if (!ISBN) return res.status(400).send({ status: false, message: "You must enter ISBN" })
@@ -39,12 +41,14 @@ const createBook = async function (req, res) {
         if (checkISBN) { return res.status(400).send({ status: false, message: "This ISBN is already present" }) }
 
         if (!category) return res.status(400).send({ status: false, message: "category is required" })
-        if (!isValid(category)) return res.status(400).send({ status: false, msg: "category should not be empty" })
+        if (!isValid(category)) return res.status(400).send({ status: false, msg: "category should not be empty & put it in a string" })
 
         if (!subcategory) return res.status(400).send({ status: false, message: "subcategory is required" })
+        if (!isValid(subcategory)) return res.status(400).send({ status: false, msg: "Subcategory should not be empty & put it in a string" })
+
 
         if (!releasedAt) return res.status(400).send({ status: false, message: "You must enter releasedAt" })
-        if (!isValid(releasedAt)) return res.status(400).send({ status: false, msg: "releasedAt should not be empty" })
+        if (!isValid(releasedAt)) return res.status(400).send({ status: false, msg: "releasedAt should be in string & not empty" })
         if (!(/^\d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])$/.test(releasedAt))) return res.status(400).send({status:false,message:`provide proper formate = yyyy-mm-dd`})
         // console.log(userId,data.tokenId)
 
@@ -67,6 +71,7 @@ const createBook = async function (req, res) {
         res.status(201).send({ status: true, message: 'Successfully Book Data is Created', data: created })
     }
     catch (err) {
+        console.log(err)
         return res.status(500).send({ status: false, mag: err.message })
 
     }
@@ -79,6 +84,7 @@ const getBooks = async function (req, res) {
     try {
         let query = req.query
 
+        
         if (query.userId) {
             if (!mongoose.isValidObjectId(query.userId)) return res.status(400).send({ status: false, msg: "userId  is not valid " })
         }
@@ -113,7 +119,6 @@ const getById = async function (req, res) {
         // validating the BookId
         if (!mongoose.isValidObjectId(bookId)) return res.status(400).send({ status: false, message: "BookId  is not valid " })
         let findBook = await bookModel.findOne({ _id: bookId, isDeleted: false, });
-        console.log({...findBook})
         if (!findBook) return res.status(404).send({ status: false, message: "Book is not found" });
 
         let reviews= await reviewModel.find({bookId:bookId,isDeleted:false})
@@ -144,18 +149,27 @@ const updateById = async function (req, res) {
 
         let { title, excerpt, releasedAt, ISBN } = req.body
 
+        if (title =="") return res.status(400).send({ status: false, message: "title can't be empty" })
         if (title) {
-            if (!isValid(title)) return res.status(400).send({ status: false, msg: "title should not be empty" })
+            if (!isValid(title)) return res.status(400).send({ status: false, msg: "title should be in string & not empty" })
             let checkTitle = await bookModel.findOne({ title })
             if (checkTitle) { return res.status(400).send({ status: false, message: "This title is already present" }) }
         }
 
+        if (excerpt =="") return res.status(400).send({ status: false, message: "excerpt can't be empty" })
         if (excerpt) {
             if (!isValid(excerpt)) return res.status(400).send({ status: false, msg: "excerpt should not be empty " })
         }
 
+        if (releasedAt =="") return res.status(400).send({ status: false, message: "releasedAt can't be empty" })
+        if(releasedAt){
+        if (!isValid(releasedAt)) return res.status(400).send({ status: false, msg: "releasedAt should be in string & not empty" })
+        if (!(/^\d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])$/.test(releasedAt))) return res.status(400).send({status:false,message:`provide proper formate = yyyy-mm-dd`})
+        }
+
+        if (ISBN =="") return res.status(400).send({ status: false, message: "ISBN can't be empty" })
         if (ISBN) {
-            if (!ISBN) return res.status(400).send({ status: false, message: "You must enter ISBN" })
+            if(!(/^(?=(?:\D*\d){10}(?:(?:\D*\d){3})?$)[\d-]+$/.test(ISBN))) return res.status(400).send({ status: false, message: "Please Provide Valid ISBN" })
             if (!isValid(ISBN)) return res.status(400).send({ status: false, msg: "ISBN should not be empty" })
             let checkISBN = await bookModel.findOne({ ISBN })
             if (checkISBN) { return res.status(400).send({ status: false, message: "This ISBN is already present" }) }

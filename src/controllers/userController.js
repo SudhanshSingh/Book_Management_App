@@ -49,17 +49,22 @@ const createUser = async function (req, res) {
         if ((password).includes(" ")) { { return res.status(400).send({ status: false, message: "Please remove any empty spaces in password" }); } }
         if (!((password.length >= 8) && (password.length < 15))) { return res.status(400).send({ status: false, message: "Password should be in 8-15 character" }) }
 
+        //if(!userData.address=="object") return res.send({message:"error"})
         if (userData.address) {
             if (Object.keys(userData.address).length == 0) { return res.status(400).send({ status: false, message: "Address can't be empty" }); }
+
+           if (userData.address.street =="") return res.status(400).send({ status: false, message: "street can't be empty" })
             if (userData.address.street) {
                 if (!isValid(userData.address.street)) { return res.status(400).send({ status: false, message: "Street address is not valid address" }); }
             }
             //if ((userData.address.street).includes(" ")) { { return res.status(400).send({ status: false, message: "Please remove any empty spaces from Street address" }); } }
+           if (userData.address.city =="") return res.status(400).send({ status: false, message: "city can't be empty" })
             if (userData.address.city) {
                 if(!(/^[a-zA-Z]+(?:[\s-][a-zA-Z]+)*$/.test(userData.address.city))) return res.status(400).send({ status: false, message: "provide a valid city" })
                 if (!isValid(userData.address.city)) { return res.status(400).send({ status: false, message: "City address is not valid address" }); }
             }
             //if ((userData.address.city).includes(" ")) { { return res.status(400).send({ status: false, message: "Please remove any empty spaces from City address" }); } }
+           if (userData.address.pincode =="") return res.status(400).send({ status: false, message: "pincode can't be empty" })
             if (userData.address.pincode) {
                 if(!(/^[1-9][0-9]{5}$/.test(userData.address.pincode))) return res.status(400).send({ status: false, message: "provide a valid pincode." })
                 if (!isValid(userData.address.pincode)) return res.status(400).send({ status: false, message: "Address pincode  is not valid pincode." });
@@ -94,15 +99,15 @@ const loginUser = async function (req, res) {
         //email = email.trim();
         
 
-        if (!isValid(password)) return res.status(400).send({ status: false, msg: "Password is mandatory for login" });
         if (!password) { return res.status(400).send({ status: false, msg: "Please include a password." }); }
+        if (!isValid(password)) return res.status(400).send({ status: false, msg: "password is invalid" });
         // Validations ends
         //finding user details in DB
         const findUser = await userModel.findOne({ email, password });
         if (!findUser) return res.status(400).send({ status: false, msg: "Invalid credentials. Please check the details & try again." })
 
         //creating JWT
-        let token = jwt.sign({ userId: findUser._id.toString() }, "Functionup-Radon");
+        let token = jwt.sign({ userId: findUser._id.toString() }, "Functionup-Radon",{expiresIn: '60s'});
         res.setHeader("x-api-key", token);
         return res.status(201).send({ status: true, message: "Token is Created Successfully", token: token });
     } catch (error) {
