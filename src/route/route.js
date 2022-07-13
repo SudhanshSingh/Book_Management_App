@@ -12,14 +12,6 @@ router.post("/login",userController.loginUser)
 
 
 
-router.get("/books",bookController.getBooks)
-router.post("/registers",reviewController.Makereview)
-router.get("/reviews",reviewController.findReview)
-router.get("/populate",reviewController.getreview)
-//router.get("/book",bookController.getBook)
-
-
-
 router.post("/books", middleWare.authenticate, bookController.createBook)
 
 router.get("/books", middleWare.authenticate, bookController.getBooks)
@@ -29,7 +21,13 @@ router.get("/books/:bookId",middleWare.authenticate,bookController.getById)
 router.put("/books/:bookId",middleWare.authenticate,middleWare.authorize,bookController.updateById)
 
 router.delete("/books/:bookId",middleWare.authenticate,middleWare.authorize,bookController.deleteBookById)
+
+
+router.post("/books/:bookId/review",reviewController.createReview)
+
 router.put("/books/:bookId/review/:reviewId",reviewController.updateReview)
+
+router.delete("/books/:bookId/review/:reviewId",reviewController.deleteReview)
 
 
 module.exports = router

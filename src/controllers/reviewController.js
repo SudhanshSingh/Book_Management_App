@@ -1,98 +1,150 @@
-const mongoose = require("mongoose")
-const bookModel= require("../models/bookModel")
+
+const mongoose = require("mongoose");
+const bookModel = require("../models/bookModel");
+const userModel = require("../models/userModel");
 const reviewModel = require("../models/reviewModel");
 
 
-
-//validation function 
-const isValid = function(value) {
-    if (typeof value === 'undefined' || value === null) return false
-    if (typeof value === 'string' && value.trim().length === 0) return false
-    return true;
+const isValid = function (value) {
+    if (typeof value === "undefined" || value === null) return false
+    if (typeof value === "string" && value.trim().length === 0) return false
+    if (typeof value === "string") return true
 }
 
-const isValidData = function(data) {
-    return Object.keys(data).length > 0
-        //will return an array of all keys. so, we can simply get the length of an array with .length
-}
-
-
-
-const Makereview = async function (req,res){
-    let data = req.body
-    let savedData = await reviewModel.create(data)
-    res.send({message:savedData})
-}
-const findReview = async function  (req,res){
-    let gotData = await reviewModel.find()
-    res.send({ message: gotData });
-}
-const getreview = async function (req, res) {
-    let specificData = await reviewModel.find().populate("bookId")
-    res.send({data: specificData})
-
-}
-
-const updateReview = async function(req, res) {
+const createReview = async function (req, res) {
     try {
-        let data = req.body
-        if (Object.keys(data).length==0) return res.status(400).send({ status: false, message: "please provide data to update" })
-
+        let data = req.body;
         let bookId = req.params.bookId
-        if (!bookId) return res.status(400).send({ status: false, message: "provide bookId" })
-        if (!mongoose.isValidObjectId(bookId)) return res.status(400).send({ status: false, message: "invalid BookId" })
 
-        const bookData = await bookModel.findOne({ _id: bookId, isDeleted: false })
-        console.log(bookData)
+        if (!bookId) return res.status(400).send({ status: false, message: "please enter bookId" })
+        if(!mongoose.isValidObjectId(bookId)) return res.status(400).send({ststua:false,message:"provide valid bookId"})
+        checkId = await bookModel.findById({ _id: bookId })
+        if (!checkId) return res.status(400).send({ status: false, message: "no such book" })
+        if (checkId.isDeleted == true) return res.status(404).send({ status: false, message: "this book is deleted" })
 
-        if (!bookData) {
-            return res.status(404).send({ message: "book doesnot exist or already deleted" });
+        if (Object.keys(data).length == 0) return res.status(400).send({ status: false, message: "please provide data" })
+
+        let { review, reviewedBy, rating } = data
+        if (review) {
+            if (!isValid(review)) return res.status(400).send({ status: false, message: "enter valid review" })
         }
 
+        if(reviewedBy) {
+            if(!(/^[a-zA-Z,\-.\s]*$/.test(reviewedBy))) return res.status(400).send({ status: false, message: "provide a valid name in reviewedBy field" });
+            if(!isValid(reviewedBy)) return res.status(400).send({status:false,message:"enter valid name"})
+        }
 
+        if (!rating) return res.status(400).send({ status: false, message: "enter rating" })
+        if (!(/^[0-5](\.[0-9][0-9]?)?$/.test(rating))) return res.status(400).send({ status: false, message: "provide a valid rating" });
+        if (typeof rating !== "number") return res.status(400).send({ status: false, message: "enter valid rating" })
+        // console.log(checkId.reviews)
+        let reviewData = {
+            bookId: bookId,
+            reviewedBy: reviewedBy,
+            reviewedAt: Date.now(),
+            rating: rating,
+            review: review
+        }
         
-        if (data.review) {
-            if (!isValid(data.review)) {
-                return res.status(400).send({ status: false, message: "please provide correct review" })
-            }
-        }
+        let newReview = await reviewModel.create(reviewData)
 
-        if (data.rating) {
-            if (!isValid(data.rating)) {
-                return res.status(400).send({ status: false, message: "please provide  proper rating  " })
-            }  
-        }
+        bookUpdate = await bookModel.findByIdAndUpdate({ _id: bookId }, { reviews: checkId.reviews + 1 }, { new: true })
+        let showData = {...bookUpdate._doc,reviewData:[newReview]}
+        res.status(200).send({ status: true, message: "review created", data: showData})
 
-        if (data.reviewedBy) {
-            if (!isValid(data.reviewedBy) ) {
-                return res.status(400).send({ status: false, message: "please provide reviewer's name" })
-            }
-          
-        }  
+    } catch (err) {
+        return res.status(500).send({ status: false, mag: err.message })
+
+    }
+}
+
+const updateReview = async function (req, res) {
+    try {
+    
+        let bookId = req.params.bookId
         let reviewId = req.params.reviewId
-        if (!reviewId) return res.status(400).send({ status: false, message: "provide reviewId" })
-        if (!mongoose.isValidObjectId(reviewId)) return res.status(400).send({ status: false, message: "invalid reviewId" }) 
 
-        let updatedReview = await reviewModel.findOneAndUpdate({ _id: reviewId, isDeleted: false },
-            {
-                $set: {
-                    review: data.review,
-                    rating: data.rating,
-                    reviewedBy:data.reviewedBy   
-                }
-            }, 
-            { new: true })
-            
-        res.status(200).send({ message: "successfully updated", data: updatedReview});
-    } catch (error) {
-        res.status(500).send({ status: false, message: error.message });
+        if (!bookId) return res.status({ status: false, message: "please enter bookId" })
+        if(!mongoose.isValidObjectId(bookId)) return res.status(400).send({ststua:false,message:"provide valid bookId"})
+        checkId = await bookModel.findById({ _id: bookId })
+        if (!checkId) return res.status(400).send({ status: false, message: "no such book" })
+        if (checkId.isDeleted == true) return res.status(404).send({ status: false, message: "this book is deleted" })
+
+        if (!reviewId) return res.status({ status: false, message: "please enter reviewId" })
+        if(!mongoose.isValidObjectId(reviewId)) return res.status(400).send({ststua:false,message:"provide valid reviewId"})
+        checkreview = await reviewModel.findById({ _id: reviewId })
+        if (!checkreview) return res.status(400).send({ status: false, message: "no such review" })
+        if (checkreview.isDeleted == true) return res.status(404).send({ status: false, message: "this review is deleted" })
+
+        if(!Object.keys(req.body).length) return res.status(400).send({ status: false, message: "please provide data to update" })
+
+        let{review, reviewedBy, rating}= req.body
+
+        if (review) {
+            if (!isValid(review)) return res.status(400).send({ status: false, message: "enter valid review" })
+        }
+
+        if(reviewedBy) {
+            if(!(/^[a-zA-Z,\-.\s]*$/.test(reviewedBy))) return res.status(400).send({ status: false, message: "provide a valid name in reviewedBy field" });
+            if(!isValid(reviewedBy)) return res.status(400).send({status:false,message:"enter valid name"})
+        }
+
+        if (rating) {
+        if (!(/^[0-5](\.[0-9][0-9]?)?$/.test(rating))) return res.status(400).send({ status: false, message: "provide a valid rating" });
+        if (typeof rating !== "number") return res.status(400).send({ status: false, message: "enter valid rating" })
+        }
+
+        let updateDoc = await reviewModel.findOneAndUpdate({
+            _id: reviewId
+        }, {
+            $set: {
+                review: review,
+                reviewedBy : reviewedBy,
+                rating: rating
+            }
+        }, { new: true })
+
+        res.status(200).send({ status: true, message: "review created", data: {...checkId._doc,reviewData:[updateDoc]}})
+    } catch (err) {
+        console.log(err)
+        return res.status(500).send({ status: false, mag: err.message })
+
+
     }
 }
 
 
-    module.exports = {Makereview,findReview,getreview,updateReview}
-    
+
+const deleteReview = async function (req, res) {
+    try {
+        let bookId = req.params.bookId
+        let reviewId = req.params.reviewId
+        // console.log(bookId,reviewId)
+
+        if (!bookId) return res.status({ status: false, message: "please enter bookId" })
+        if(!mongoose.isValidObjectId(bookId)) return res.status(400).send({ststua:false,message:"provide valid bookId"})
+        checkId = await bookModel.findById({ _id: bookId })
+        if (!checkId) return res.status(400).send({ status: false, message: "no such book" })
+        if (checkId.isDeleted == true) return res.status(404).send({ status: false, message: "this book is deleted" })
+
+        if (!reviewId) return res.status({ status: false, message: "please enter reviewId" })
+        if(!mongoose.isValidObjectId(reviewId)) return res.status(400).send({ststua:false,message:"provide valid reviewId"})
+        checkreview = await reviewModel.findById({ _id: reviewId })
+        if (!checkreview) return res.status(400).send({ status: false, message: "no such review" })
+        if (checkreview.isDeleted == true) return res.status(404).send({ status: false, message: "this review is deleted" })
+
+        let Update = await reviewModel.findOneAndUpdate({ _id: reviewId }, { isDeleted: true, deletedAt: Date.now() }, { new: true });
+
+        bookUpdate = await bookModel.findByIdAndUpdate({ _id: bookId }, { reviews: checkId.reviews - 1 }, { new: true })
+        console.log({...bookUpdate._doc,reviewData:[Update]})
+
+        return res.status(200).send({ status: true, message: "successfully deleted book", });
+
+    } catch (err) {
+        return res.status(500).send({ status: false, mag: err.message })
+
+    }
+} 
 
 
-
-
+module.exports = { createReview, updateReview, deleteReview }
