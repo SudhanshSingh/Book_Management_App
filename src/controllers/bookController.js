@@ -56,18 +56,6 @@ const createBook = async function (req, res) {
 
         if (userId != data.tokenId) return res.status(400).send({ status: false, message: "You are unauthorized" })
 
-        // if(!data) return res.send({msg:"no data"})
-        // if(data && data.length>0){
-        //     //upload to s3 and get the uploaded link
-        //     // res.send the link back to frontend/postman
-        //     let uploadedFileURL= await uploadFile( data[0] )
-        //     //res.status(201).send({msg: "file uploaded succesfully", data: uploadedFileURL})
-        // }
-        // else{
-        //     res.status(400).send({ msg: "No file found" })
-        // }
-
-
         let reqData = {
             title: title,
             excerpt: excerpt,
@@ -146,6 +134,7 @@ const getById = async function (req, res) {
 
 
 
+
 const updateById = async function (req, res) {
     try {
         let bookId = req.params.bookId
@@ -155,7 +144,7 @@ const updateById = async function (req, res) {
         if (!checkId) return res.status(404).send({ status: false, message: "no such Book" })
         if (checkId.isDeleted == true) return res.status(404).send({ status: false, message: "Book is already deleted" })
 
-        if (Object.keys(req.body).length == 1) return res.status(400).send({ status: false, message: "please provide data to update" })
+        if (Object.keys(req.body).length == 0) return res.status(400).send({ status: false, message: "please provide data to update" })
 
         let { title, excerpt, releasedAt, ISBN } = req.body
 

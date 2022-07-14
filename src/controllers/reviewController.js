@@ -1,3 +1,4 @@
+
 const mongoose = require("mongoose");
 const bookModel = require("../models/bookModel");
 const reviewModel = require("../models/reviewModel");
@@ -19,6 +20,7 @@ const createReview = async function (req, res) {
         if (!mongoose.isValidObjectId(bookId)) return res.status(400).send({ status: false, message: "provide valid bookId" })
         let checkId = await bookModel.findById({ _id: bookId })
         if (!checkId) return res.status(404).send({ status: false, message: "no such book" })
+
         if (checkId.isDeleted == true) return res.status(404).send({ status: false, message: "this book is deleted" })
 
         if (Object.keys(data).length == 0) return res.status(400).send({ status: false, message: "please provide data" })
@@ -119,11 +121,12 @@ const updateReview = async function (req, res) {
     } catch (err) {
         return res.status(500).send({ status: false, mag: err.message })
 
+
     }
 }
 
 
-const deleteReview = async function (req, res) { 
+const deleteReview = async function (req, res) {
     try {
         let bookId = req.params.bookId
         let reviewId = req.params.reviewId

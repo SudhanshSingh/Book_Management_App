@@ -1,12 +1,8 @@
 const mongoose = require('mongoose');
-
+const ObjectId = mongoose.Schema.Types.ObjectId ;
 
 const reviewSchema = new mongoose.Schema({
-    bookId:{
-        type: mongoose.Types.ObjectId,
-        ref: "Book",
-        required: true
-    },
+    bookId: {type :ObjectId, ref :"Book"},
     reviewedBy: {
         type: String,
         required: true,
