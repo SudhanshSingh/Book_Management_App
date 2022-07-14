@@ -123,7 +123,7 @@ const updateReview = async function (req, res) {
 }
 
 
-const deleteReview = async function (req, res) {
+const deleteReview = async function (req, res) { 
     try {
         let bookId = req.params.bookId
         let reviewId = req.params.reviewId
@@ -145,7 +145,7 @@ const deleteReview = async function (req, res) {
         let Update = await reviewModel.findOneAndUpdate({ _id: reviewId }, { isDeleted: true, deletedAt: Date.now() }, { new: true });
 
         let bookUpdate = await bookModel.findByIdAndUpdate({ _id: bookId }, { reviews: checkId.reviews - 1 }, { new: true })
-
+        
         console.log({ ...bookUpdate._doc, reviewsData: Update })
 
         return res.status(200).send({ status: true, message: "successfully deleted review", });

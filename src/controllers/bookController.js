@@ -2,6 +2,8 @@ const mongoose = require("mongoose");
 const bookModel = require("../models/bookModel");
 const reviewModel = require("../models/reviewModel");
 const userModel = require("../models/userModel");
+const aws = require("aws-sdk")
+
 
 const isValid = function (value) {
     if (typeof value === "undefined" || value === null) return false
@@ -9,10 +11,11 @@ const isValid = function (value) {
     if (typeof value === "string") return true
 }
 
+
 ////////////////////////////////////////////////////-----CREATE BOOK-------//////////////////////////////////////////////////////////////////
 const createBook = async function (req, res) {
     try {
-        let data = req.body;
+        let data= req.body
 
         if (Object.keys(data).length == 1) {
             return res.status(400).send({ status: false, message: "You must enter data" })
@@ -53,6 +56,17 @@ const createBook = async function (req, res) {
 
         if (userId != data.tokenId) return res.status(400).send({ status: false, message: "You are unauthorized" })
 
+        // if(!data) return res.send({msg:"no data"})
+        // if(data && data.length>0){
+        //     //upload to s3 and get the uploaded link
+        //     // res.send the link back to frontend/postman
+        //     let uploadedFileURL= await uploadFile( data[0] )
+        //     //res.status(201).send({msg: "file uploaded succesfully", data: uploadedFileURL})
+        // }
+        // else{
+        //     res.status(400).send({ msg: "No file found" })
+        // }
+
 
         let reqData = {
             title: title,
@@ -61,7 +75,7 @@ const createBook = async function (req, res) {
             ISBN: ISBN,
             category: category,
             subcategory: subcategory,
-            releasedAt: releasedAt
+            releasedAt: releasedAt,
         }
         let created = await bookModel.create(reqData)
         res.status(201).send({ status: true, message: 'Successfully Book Data is Created', data: created })
