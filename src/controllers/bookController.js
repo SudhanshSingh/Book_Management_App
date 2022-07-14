@@ -2,19 +2,22 @@ const mongoose = require("mongoose");
 const bookModel = require("../models/bookModel");
 const reviewModel = require("../models/reviewModel");
 const userModel = require("../models/userModel");
+
 const aws= require("aws-sdk");
+
 const isValid = function (value) {
     if (typeof value === "undefined" || value === null) return false
     if (typeof value === "string" && value.trim().length === 0) return false
     if (typeof value === "string") return true
 }
 
+
 ////////////////////////////////////////////////////-----CREATE BOOK-------//////////////////////////////////////////////////////////////////
 const createBook = async function (req, res) {
     try {
-        let data = req.body;
+        let data= req.body
 
-        if (Object.keys(data).length == 1) {
+        if (Object.keys(data).length == 0) {
             return res.status(400).send({ status: false, message: "You must enter data" })
         }
         let { title, excerpt, userId, ISBN, category, subcategory, releasedAt } = data
@@ -52,7 +55,6 @@ const createBook = async function (req, res) {
         if (!(/^\d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])$/.test(releasedAt))) return res.status(400).send({ status: false, message: `provide proper formate = yyyy-mm-dd` })
 
         if (userId != data.tokenId) return res.status(400).send({ status: false, message: "You are unauthorized" })
- 
 
         let reqData = {
             title: title,
@@ -61,53 +63,58 @@ const createBook = async function (req, res) {
             ISBN: ISBN,
             category: category,
             subcategory: subcategory,
-            releasedAt: releasedAt
+            releasedAt: releasedAt,
         }
         aws.config.update({
             accessKeyId: "AKIAY3L35MCRVFM24Q7U",
             secretAccessKey: "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",
             region: "ap-south-1"
         })
+
+        
         let uploadFile= async ( file) =>{
-            return new Promise( function(resolve, reject) {
-             // this function will upload file to aws and return the link
-             let s3= new aws.S3({apiVersion: '2006-03-01'}); // we will be using the s3 service of aws
-         
-             var uploadParams= {
-                 ACL: "public-read",
-                 Bucket: "classroom-training-bucket",  //HERE
-                 Key: "P3G75/" + file.originalname, //HERE 
-                 Body: file.buffer
-             }
-         
-         
-             s3.upload( uploadParams, function (err, data ){
-                 if(err) {
-                     return reject({"error": err})
-                 }
-                 console.log(data)
-                 console.log("file uploaded succesfully")
-                 return resolve(data.Location)
-             })
+           return new Promise( function(resolve, reject) {
+            // this function will upload file to aws and return the link
+            let s3= new aws.S3({apiVersion: '2006-03-01'}); 
+        
+            var uploadParams= {
+                ACL: "public-read",
+                Bucket: "classroom-training-bucket",  
+                Key: "group75/" + file.originalname, 
+                Body: file.buffer
+            }
+        
+        
+            s3.upload( uploadParams, function (err, data ){
+                if(err) {
+                    return reject({"error": err})
+                }
+                console.log(data)
+                console.log("file uploaded succesfully")
+                return resolve(data.Location)
             })
-         }
-         let files= req.files
+
+        
+           })
+        }
+        let files= req.files
         if(files && files.length>0){
-            //upload to s3 and get the uploaded link
-            // res.send the link back to frontend/postman
             let uploadedFileURL= await uploadFile( files[0] )
-            reqData.bookCover=uploadedFileURL
+            reqData.bookCover= uploadedFileURL
             let created = await bookModel.create(reqData)
             res.status(201).send({ status: true, message: 'Successfully Book Data is Created', data: created })
-          
+
         }
         else{
             res.status(400).send({ msg: "No file found" })
         }
+
    
+
+
+
     }
     catch (err) {
-        console.log(err)
         return res.status(500).send({ status: false, mag: err.message })
 
     }
@@ -164,13 +171,9 @@ const getById = async function (req, res) {
         return res.status(200).send({ status: true, message: "booklist", data: bookData });
 
     } catch (err) {
-        console.log(err)
         return res.status(500).send({ status: false, message: err.message });
     }
 };
-
-
-
 
 
 const updateById = async function (req, res) {

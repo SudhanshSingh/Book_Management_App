@@ -101,7 +101,7 @@ const loginUser = async function (req, res) {
         // Validations ends
         //finding user details in DB
         const findUser = await userModel.findOne({ email, password });
-        if (!findUser) return res.status(400).send({ status: false, message: "Invalid credentials. Please check the details & try again." })
+        if (!findUser) return res.status(401).send({ status: false, message: "Invalid credentials. Please check the details & try again." })
 
         //creating JWT
         let token = jwt.sign({ userId: findUser._id.toString() }, "Functionup-Radon",{expiresIn: '24h'});
