@@ -26,7 +26,6 @@ const authenticate = function (req, res, next) {
             }
         });
     } catch (err) {
-    console.log(err)
     return res.status(500).send({ message: "Error", error: err.message });
 }
 };

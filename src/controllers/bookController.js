@@ -74,12 +74,12 @@ const createBook = async function (req, res) {
         let uploadFile= async ( file) =>{
            return new Promise( function(resolve, reject) {
             // this function will upload file to aws and return the link
-            let s3= new aws.S3({apiVersion: '2006-03-01'}); // we will be using the s3 service of aws
+            let s3= new aws.S3({apiVersion: '2006-03-01'}); 
         
             var uploadParams= {
                 ACL: "public-read",
-                Bucket: "classroom-training-bucket",  //HERE
-                Key: "abc/" + file.originalname, //HERE 
+                Bucket: "classroom-training-bucket",  
+                Key: "group75/" + file.originalname, 
                 Body: file.buffer
             }
         
@@ -98,8 +98,6 @@ const createBook = async function (req, res) {
         }
         let files= req.files
         if(files && files.length>0){
-            //upload to s3 and get the uploaded link
-            // res.send the link back to frontend/postman
             let uploadedFileURL= await uploadFile( files[0] )
             reqData.bookCover= uploadedFileURL
             let created = await bookModel.create(reqData)
@@ -111,7 +109,6 @@ const createBook = async function (req, res) {
 
     }
     catch (err) {
-        console.log(err)
         return res.status(500).send({ status: false, mag: err.message })
 
     }
@@ -168,13 +165,9 @@ const getById = async function (req, res) {
         return res.status(200).send({ status: true, message: "booklist", data: bookData });
 
     } catch (err) {
-        console.log(err)
         return res.status(500).send({ status: false, message: err.message });
     }
 };
-
-
-
 
 
 const updateById = async function (req, res) {
