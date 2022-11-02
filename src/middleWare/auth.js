@@ -4,8 +4,6 @@ const mongoose = require("mongoose");
 const jwt = require("jsonwebtoken");
 
 
-
-
 const authenticate = function (req, res, next) {
     try {
         let token = req.headers["x-api-key"];
