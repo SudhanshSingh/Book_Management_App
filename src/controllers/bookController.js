@@ -207,7 +207,7 @@ const createBook = async function (req, res) {
 const getBooks = async function (req, res) {
   try {
     let query = req.query;
-    console.log(query)
+  
 
     if (query.userId) {
       if (!mongoose.isValidObjectId(query.userId))
@@ -241,6 +241,8 @@ const getBooks = async function (req, res) {
         category: 1,
         reviews: 1,
         releasedAt: 1,
+        bookCover:1,
+        ISBN:1
       });
     if (allBooks.length == 0)
       return res.status(404).send({ status: false, message: "no such book" });
