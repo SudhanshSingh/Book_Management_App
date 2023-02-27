@@ -69,7 +69,8 @@ const createUser = async function (req, res) {
           });
       }
     }
-    const uniqueMobile = await userModel.findOne({ phone });
+    console.log(phone)
+    const uniqueMobile = await userModel.findOne({phone });
     if (uniqueMobile)
       return res
         .status(400)
@@ -214,15 +215,15 @@ const createUser = async function (req, res) {
         data: savedData,
       });
   } catch (err) {
-    console.log(err);
+    console.log(typeof err);
     return res
       .status(500)
-      .send({ status: false, message: "Error", error: err.message });
+      .send({ status: false, message: "Error", error: err.message});
   }
 };
 
-// login user
-const loginUser = async function (req, res) {
+// >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>  login user  <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+async function loginUser(req, res) {
   try {
     const data = req.body;
     if (!Object.keys(data).length)
@@ -251,7 +252,6 @@ const loginUser = async function (req, res) {
         .send({ status: false, message: "Email is required for login" });
     // Email validation whether it is entered perfect or not.
     //email = email.trim();
-
     if (!password) {
       return res
         .status(400)
@@ -289,5 +289,5 @@ const loginUser = async function (req, res) {
   } catch (error) {
     res.status(500).send({ status: false, Error: error.message });
   }
-};
+}
 module.exports = { createUser, loginUser };

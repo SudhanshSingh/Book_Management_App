@@ -3,11 +3,13 @@ const bodyParser = require('body-parser');
 const multer = require("multer")
 const route = require('./route/route.js');
 const mongoose = require('mongoose');
+const cors=require('cors')
 const app = express();
 
 app.use(bodyParser.json());
 app.use(multer().any())
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(cors())
 
 
 mongoose.connect("mongodb+srv://Sudhanshu_09:5JQhJtJ5mUWQIBwo@cluster0.kt4fu.mongodb.net/bookmamagement", {
@@ -24,6 +26,6 @@ app.use((req,res,next)=>{
 })
 
 
-app.listen(process.env.PORT || 3000, function () {
-    console.log('Express app running on port ' + (process.env.PORT || 3000))
+app.listen(process.env.PORT || 4000, function () {
+    console.log('Express app running on port ' + (process.env.PORT || 4000))
 });
