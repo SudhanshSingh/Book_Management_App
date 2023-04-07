@@ -14,7 +14,7 @@ const createUser = async function (req, res) {
     let userData = req.body;
     //console.log(userData)
     if (Object.keys(userData).length == 0) {
-      console.log(Object.keys(userData))
+      //console.log(Object.keys(userData))
       return res
         .status(400)
         .send({ status: false, message: "UserData can't be empty" });
@@ -69,7 +69,7 @@ const createUser = async function (req, res) {
           });
       }
     }
-    console.log(phone)
+    //console.log(phone)
     const uniqueMobile = await userModel.findOne({phone });
     if (uniqueMobile)
       return res
@@ -215,7 +215,7 @@ const createUser = async function (req, res) {
         data: savedData,
       });
   } catch (err) {
-    console.log(typeof err);
+   // console.log(typeof err);
     return res
       .status(500)
       .send({ status: false, message: "Error", error: err.message});

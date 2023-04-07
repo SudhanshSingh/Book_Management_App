@@ -2,8 +2,7 @@ const mongoose = require("mongoose");
 const bookModel = require("../models/bookModel");
 const reviewModel = require("../models/reviewModel");
 const userModel = require("../models/userModel");
-
-const aws = require("aws-sdk");
+const { uploadFile } = require("../aws/uploadImage");
 
 const isValid = function (value) {
   if (typeof value === "undefined" || value === null) return false;
@@ -15,7 +14,10 @@ const isValid = function (value) {
 const createBook = async function (req, res) {
   try {
     let data = req.body;
-
+    data['userId']=req.body.tokenId
+    //console.log(data);
+    const bookImage = req.files;
+    //console.log(bookImage)
     if (Object.keys(data).length == 0) {
       return res
         .status(400)
@@ -53,24 +55,20 @@ const createBook = async function (req, res) {
         .status(400)
         .send({ status: false, message: "You must enter userId" });
     if (!isValid(userId))
-      return res
-        .status(400)
-        .send({
-          status: false,
-          message: "userId should not be empty & put it in  a string",
-        });
+      return res.status(400).send({
+        status: false,
+        message: "userId should not be empty & put it in  a string",
+      });
     if (!mongoose.isValidObjectId(userId))
       return res
         .status(400)
         .send({ status: false, message: "userId  is not valid " });
     let checkUserId = await userModel.findOne({ _id: userId });
     if (!checkUserId) {
-      return res
-        .status(400)
-        .send({
-          status: false,
-          message: " please register. not a valid user. ",
-        });
+      return res.status(400).send({
+        status: false,
+        message: " please register. not a valid user. ",
+      });
     }
 
     if (!ISBN)
@@ -97,24 +95,20 @@ const createBook = async function (req, res) {
         .status(400)
         .send({ status: false, message: "category is required" });
     if (!isValid(category))
-      return res
-        .status(400)
-        .send({
-          status: false,
-          message: "category should not be empty & put it in a string",
-        });
+      return res.status(400).send({
+        status: false,
+        message: "category should not be empty & put it in a string",
+      });
 
     if (!subcategory)
       return res
         .status(400)
         .send({ status: false, message: "subcategory is required" });
     if (!isValid(subcategory))
-      return res
-        .status(400)
-        .send({
-          status: false,
-          message: "Subcategory should not be empty & put it in a string",
-        });
+      return res.status(400).send({
+        status: false,
+        message: "Subcategory should not be empty & put it in a string",
+      });
 
     if (!releasedAt)
       return res
@@ -122,21 +116,17 @@ const createBook = async function (req, res) {
         .send({ status: false, message: "You must enter releasedAt" });
 
     if (!isValid(releasedAt))
-      return res
-        .status(400)
-        .send({
-          status: false,
-          message: "releasedAt should be in string & not empty",
-        });
+      return res.status(400).send({
+        status: false,
+        message: "releasedAt should be in string & not empty",
+      });
     if (
       !/^\d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])$/.test(releasedAt)
     )
-      return res
-        .status(400)
-        .send({
-          status: false,
-          message: `provide proper formate = yyyy-mm-dd`,
-        });
+      return res.status(400).send({
+        status: false,
+        message: `provide proper formate = yyyy-mm-dd`,
+      });
 
     if (userId != data.tokenId)
       return res
@@ -151,54 +141,47 @@ const createBook = async function (req, res) {
       category: category,
       subcategory: subcategory,
       releasedAt: releasedAt,
+      userId:userId
     };
+
+   // console.log('bookData',reqData)
+    
+         // <--------profile image validation & upload on the aws server------------->
+    if (bookImage.length == 0)
+    return res
+      .status(400)
+      .send({ status: false, message: "bookImage is required" });
+
+
+  if (bookImage && bookImage.length > 0) {
+    if (
+      bookImage[0].mimetype == "image/jpg" ||
+      bookImage[0].mimetype == "image/png" ||
+      bookImage[0].mimetype == "image/jpeg"
+    ) {
+ 
+      const uploadImage = await uploadFile(bookImage[0]);
   
-    aws.config.update({
-      accessKeyId: "AKIAY3L35MCRZNIRGT6N",
-      secretAccessKey: "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",
-      region: "ap-south-1"
-  });
-  
+      reqData["bookCover"] = uploadImage;
 
-    let uploadFile = async (file) => {
-      return new Promise(function (resolve, reject) {
-        // this function will upload file to aws and return the link
-        let s3 = new aws.S3({ apiVersion: "2006-03-01" });
-
-        var uploadParams = {
-          ACL: "public-read",
-          Bucket: "classroom-training-bucket",
-          Key: "bookApp/" + file.originalname,
-          Body: file.buffer,
-        };
-
-        s3.upload(uploadParams, function (err, data) {
-          if (err) {
-            return reject({ error: err });
-          }
-          // console.log(data);
-          console.log("file uploaded succesfully");
-          return resolve(data.Location);
-        });
-      });
-    };
-    let files = req.files;
-    if (files && files.length > 0) {
-      let uploadedFileURL = await uploadFile(files[0]);
-      reqData.bookCover = uploadedFileURL;
-      let created = await bookModel.create(reqData);
-      res
-        .status(201)
+    } else
+      return res
+        .status(400)
         .send({
-          status: true,
-          message: "Successfully Book Data is Created",
-          data: created,
+          status: false,
+          message: "Book image should be in jpg, jpeg or png format !!",
         });
-    } else {
-      res.status(400).send({ msg: "No file found" });
-    }
+  }
+  
+      let created = await bookModel.create(reqData);
+      res.status(201).send({
+        status: true,
+        message: "Successfully Book Data is Created",
+        data: created,
+      });
+    
   } catch (err) {
-    console.log(err)
+    //console.log(err);
     return res.status(500).send({ status: false, message: err.message });
   }
 };
@@ -207,7 +190,6 @@ const createBook = async function (req, res) {
 const getBooks = async function (req, res) {
   try {
     let query = req.query;
-  
 
     if (query.userId) {
       if (!mongoose.isValidObjectId(query.userId))
@@ -241,8 +223,8 @@ const getBooks = async function (req, res) {
         category: 1,
         reviews: 1,
         releasedAt: 1,
-        bookCover:1,
-        ISBN:1
+        bookCover: 1,
+        ISBN: 1,
       });
     if (allBooks.length == 0)
       return res.status(404).send({ status: false, message: "no such book" });
@@ -318,12 +300,10 @@ const updateById = async function (req, res) {
         .send({ status: false, message: "title can't be empty" });
     if (title) {
       if (!isValid(title))
-        return res
-          .status(400)
-          .send({
-            status: false,
-            message: "title should be in string & not empty",
-          });
+        return res.status(400).send({
+          status: false,
+          message: "title should be in string & not empty",
+        });
       let checkTitle = await bookModel.findOne({ title });
       if (checkTitle) {
         return res
@@ -349,21 +329,17 @@ const updateById = async function (req, res) {
         .send({ status: false, message: "releasedAt can't be empty" });
     if (releasedAt) {
       if (!isValid(releasedAt))
-        return res
-          .status(400)
-          .send({
-            status: false,
-            message: "releasedAt should be in string & not empty",
-          });
+        return res.status(400).send({
+          status: false,
+          message: "releasedAt should be in string & not empty",
+        });
       if (
         !/^\d{4}\-(0?[1-9]|1[012])\-(0?[1-9]|[12][0-9]|3[01])$/.test(releasedAt)
       )
-        return res
-          .status(400)
-          .send({
-            status: false,
-            message: `provide proper formate = yyyy-mm-dd`,
-          });
+        return res.status(400).send({
+          status: false,
+          message: `provide proper formate = yyyy-mm-dd`,
+        });
     }
 
     if (ISBN == "")
@@ -405,7 +381,7 @@ const updateById = async function (req, res) {
       .status(200)
       .send({ status: true, message: "Book updated", data: updateBook });
   } catch (err) {
-    console.log(err);
+    //console.log(err);
     res.status(500).send({ status: false, message: err.message });
   }
 };
@@ -438,7 +414,7 @@ const deleteBookById = async function (req, res) {
       { isDeleted: true, deletedAt: Date() },
       { new: true }
     );
-    console.log(Update);
+   // console.log(Update);
     return res
       .status(200)
       .send({ status: true, message: "successfully deleted book" });

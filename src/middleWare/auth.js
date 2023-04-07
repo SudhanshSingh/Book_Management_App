@@ -73,7 +73,7 @@ const authorize = async function (req, res, next) {
         .status(403)
         .send({
           status: false,
-          message: "User loggedIn is not allowed to modify the requested  data",
+          message: "UnAuthorised:you cannot perform this task",
         });
     }
 
