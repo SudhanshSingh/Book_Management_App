@@ -283,7 +283,7 @@ async function loginUser(req, res) {
       .status(201)
       .send({
         status: true,
-        message: "Token is Created Successfully",
+        message: "Successfully Logined ",
         token: token,
       });
   } catch (error) {

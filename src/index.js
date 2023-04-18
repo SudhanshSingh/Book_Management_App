@@ -1,18 +1,22 @@
 const express = require('express');
+const dotenv = require('dotenv')
+dotenv.config({path:"./.env"})
 const bodyParser = require('body-parser');
 const multer = require("multer")
 const route = require('./route/route.js');
 const mongoose = require('mongoose');
 const cors=require('cors')
+const path=require("path")
 const app = express();
 
 app.use(bodyParser.json());
 app.use(multer().any())
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.static(path.resolve(process.env.PUBLIC_DIR)))
 app.use(cors())
 
 
-mongoose.connect("mongodb+srv://Sudhanshu_09:5JQhJtJ5mUWQIBwo@cluster0.kt4fu.mongodb.net/bookmamagement", {
+mongoose.connect(process.env.MONGO_STRING, {
     useNewUrlParser: true
 })
 .then( () => console.log("MongoDb is connected"))
